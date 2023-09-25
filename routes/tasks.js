@@ -3,12 +3,12 @@ const route = express.Router();
 const { taskCollection } = require("../schema/taskSchema");
 const jwt = require("jsonwebtoken");
 const router = require("./auth");
+const { config } = require("dotenv");
 require("dotenv").config();
 
 //to login in before doing a task
 function isUserLoggedIn(req, res, next){
- const authorizationHeader =  req.header.authorization;
- console.log(process.env.secret);
+ const authorizationHeader =  req.headers.authorization;
 
  if(!authorizationHeader){
   res.status(401).send("no-authorization-header");
@@ -21,17 +21,34 @@ function isUserLoggedIn(req, res, next){
 
  const tokenValue = val[1];
 
- if (tokentype = "Bearer"){
-  const decoded = jwt.verify(tokenValue, process.env.secret);
-  console.log(decoded);
+  const token = req.body.token || req.query.token || req.headers["x-access-token"];
+
+  if (!token){
+    return res.status(403).send("A token is required for authentication");
+  }
+  try{
+    const decoded = jwt.verify(token, config.TOKEN_KEY);
+    req.user = decoded;
+  }catch (err){
+    return
+    res.status(401).send("Invalid token");
+  }
+  return
   next();
-  return;
- }
- res.status(401).send("Not-Authorized");
-}
+ };
+
+//  if (tokentype == "Bearer"){
+//   const decoded = jwt.verify(tokenValue, process.env.jwt_secret);
+//   req.decoded = decoded;
+//   next();
+//   return;
+//  }
+//  res.status(401).send("Not-Authorized");
+// }
 
 route.get("/", async (req, res) => {
-  const tasks = await taskCollection.find();
+  console.log(req);
+  const tasks = await taskCollection.find({user: req.decoded.userId});
   res.json(tasks);
 });
 
@@ -39,6 +56,7 @@ route.post("/", async (req, res) => {
   const newTask = await taskCollection.create({
     taskTitle: req.body.taskTitle,
     taskBody: req.body.taskBody,
+    user: req.decoded.userId
   });
   res.json({
     isRequestSuccessful: true,

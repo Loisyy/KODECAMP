@@ -11,7 +11,7 @@ const connect = mongoose.connect(process.env.mongoDBURL);
 
 connect
   .then(() => {
-    console.log("connected succesfully");
+    console.log("connected succesfully to datebase");
   })
   .catch((error) => {
     console.log("could not connect to the database reason = ", error);

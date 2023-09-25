@@ -4,7 +4,7 @@ const {userCollection} = require("../schema/userSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-//const secret = "dgjhmbvxddgjkmmnbcxsdfgjikk";
+//const secret = "dgjhmbvxddggjgkhhkkjkll";
 router.post("/register", async (req, res) => {
 
     //salt makes it difficult to unhash a password $ the value 10 makes it gen 10 diff password hence making it more harder
@@ -39,7 +39,7 @@ const token = jwt.sign({
     
     //passing user all details 
     //const token = jwt.sign(JSON.parse(JSON.stringify(userDetail)), 
-}, process.env.secret);
+}, process.env.jwt_secret);
     
 
 res.send({
