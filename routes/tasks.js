@@ -10,9 +10,9 @@ require("dotenv").config();
 function isUserLoggedIn(req, res, next){
  const authorizationHeader =  req.headers.authorization;
 
- if(!authorizationHeader){
-  res.status(401).send("no-authorization-header");
-  return;
+ if (!req.headers.authorization) {
+   res.status(403).send("no-authorization-header");
+   return;
  }
 
  const val = authorizationHeader.split(" ");
@@ -21,8 +21,7 @@ function isUserLoggedIn(req, res, next){
 
  const tokenValue = val[1];
 
-  const token = req.body.token || req.query.token || req.headers["x-access-token"];
-
+  
   if (!token){
     return res.status(403).send("A token is required for authentication");
   }
@@ -47,7 +46,7 @@ function isUserLoggedIn(req, res, next){
 // }
 
 route.get("/", async (req, res) => {
-  console.log(req);
+  console.log(req.headers);
   const tasks = await taskCollection.find({user: req.decoded.userId});
   res.json(tasks);
 });
