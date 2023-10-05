@@ -3,7 +3,9 @@ const router = express.Router();
 const {userCollection} = require("../schema/userSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {isUserLoggedIn} = require ("./middlewares");
 require("dotenv").config();
+
 //const secret = "dgjhmbvxddggjgkhhkkjkll";
 router.post("/register", async (req, res) => {
 
@@ -16,6 +18,7 @@ const hashedPassword = bcrypt.hashSync(req.body.password, salt);
     await userCollection.create({
         fullName: req.body.fullName,
         email: req.body.email,
+        role: req.body.role,
         password:hashedPassword
     });
     res.status(201).send("Created Successfully");
@@ -24,18 +27,21 @@ const hashedPassword = bcrypt.hashSync(req.body.password, salt);
 //to create a login route
 router.post("/login", async(req, res) =>{
 //find, findById or findOne
-    const userDetail = await userCollection.findOne({email: req.body.email});
+const {email, password} = req.body;
+    const userDetail = await userCollection.findOne({email});
 
 if(!userDetail) res.status(404).send("user-not-found");
 //accept password by comparing password entered by the user and that was stored bfr
-const doesPasswordMatch = bcrypt.compareSync(req.body.password, userDetail.password);
+const doesPasswordMatch = bcrypt.compareSync(password, userDetail.password);
 
 if (!doesPasswordMatch) return res.status(400).send("invalid credentials");
 
+const {email:userEmail, _id, role} = userDetail;
 //passing user specfic details 
 const token = jwt.sign({
-     email: userDetail.email,
-    userId: userDetail._id
+     email: userEmail,
+    userId: _id,
+    role: role
     
     //passing user all details 
     //const token = jwt.sign(JSON.parse(JSON.stringify(userDetail)), 
@@ -49,4 +55,19 @@ res.send({
 });
 
 
+router.get("/profile", isUserLoggedIn, async (req, res) => {
+  try {
+    const userId = req.decoded;
+    const user = await userCollection.findById(userId,
+      "fullName email" //or "-password"
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.send(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 module.exports = router;
