@@ -18,6 +18,8 @@ connect
   });
 
 app.use(express.json());
+app.use(express.urlencoded({extended: false}))
+
 app.use("/v1/tasks", tasksRoute);
 app.use("/v1/auth", authRoute);
 
