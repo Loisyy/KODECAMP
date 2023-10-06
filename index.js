@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const tasksRoute = require("./routes/tasks");
 const authRoute = require("./routes/auth");
+const path = require("path");
+const taskwithPicture = require("./routes/uploadPics");
 
 const connect = mongoose.connect(process.env.mongoDBURL);
 //mongoDBURL=mongodb+srv://Loisy:zBiX0FJTSZnUvKnR@cluster0.eqpu6g6.mongodb.net/Kodecamp_crude.Backendtask
@@ -18,10 +20,12 @@ connect
   });
 
 app.use(express.json());
-app.use(express.urlencoded({extended: false}))
+app.use(express.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/v1/tasks", tasksRoute);
 app.use("/v1/auth", authRoute);
+app.use("/v1/upload-pic", taskwithPicture)
 
 
 

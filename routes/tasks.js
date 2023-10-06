@@ -20,7 +20,7 @@ route.get("/", async (req, res) => {
 
 route.post("/", async (req, res) => {
   const{taskTitle, taskBody} = req.body;
-  const {userId} = req.decoded;
+  const {userId} = req.user;
   const newTask = await taskCollection.create({
     taskTitle,
     taskBody,
