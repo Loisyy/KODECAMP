@@ -35,7 +35,7 @@ router.post("/pic", upload.single("file"), async (req, res) => {
     const { filename } = req.file;
     const { userId } = req.user;
 
-console.log(req.file.;
+console.log(req.file);
 
     const newTask = await taskCollection.create({
       taskTitle,
