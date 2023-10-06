@@ -25,9 +25,33 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/v1/tasks", tasksRoute);
 app.use("/v1/auth", authRoute);
-app.use("/v1/upload-pic", taskwithPicture)
+//app.use("/v1/upload-pic", taskwithPicture)
 
+router.use(isUserLoggedIn);
 
+router.post("/pic", upload.single("file"), async (req, res) => {
+  try {
+    const { taskTitle, taskBody } = req.body;
+    const { filename } = req.file;
+    const { userId } = req.user;
+
+console.log(req.file.;
+
+    const newTask = await taskCollection.create({
+      taskTitle,
+      taskBody,
+      pictureName: filename,
+      user: userId,
+    });
+
+    res.send({
+      successful: true,
+      newTask,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "internal server error" });
+  }
+});
 
 app.listen(port, function () {
   console.log("listening to port", port);
